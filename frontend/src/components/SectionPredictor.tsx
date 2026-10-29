@@ -24,7 +24,7 @@ export const SectionPredictor: React.FC = () => {
       setError('Please provide a valid non-negative number of days for Recency.');
       return;
     }
-    if (!Number.isInteger(f) || f < 1) {
+    if (!Number.isSafeInteger(f) || f < 1) {
       setError('Please provide at least 1 completed purchase order.');
       return;
     }
@@ -277,9 +277,9 @@ export const SectionPredictor: React.FC = () => {
 
                     <div className="p-3.5 rounded-lg bg-[#FAF9F5] border border-[#EAE9E4] text-xs">
                       <span className="text-[10px] text-[#242725]/65 block">Your Spending</span>
-                      <strong className="text-sm text-[#242725]">£{result.input_values.monetary.toLocaleString()}</strong>
+                      <strong className="text-sm text-[#242725]">£{result.input_values.monetary.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                       <span className="text-[11px] text-[#4f6955] block mt-1">
-                        Median: £{result.cluster_medians.monetary.toLocaleString()}
+                        Median: £{result.cluster_medians.monetary.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                       <span className="text-[10px] text-[#242725]/60 block mt-0.5 font-medium text-[#4f6955]">
                         {result.comparison.monetary_comparison}

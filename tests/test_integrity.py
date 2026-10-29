@@ -68,6 +68,12 @@ def test_saved_pipeline_matches_every_training_assignment_and_metrics():
 def test_invalid_prediction_inputs(payload):
     assert client.post('/api/predict',json=payload).status_code==422
 
+@pytest.mark.parametrize('number',['NaN','Infinity','-Infinity','1e999'])
+def test_nonfinite_json_numbers_return_serializable_errors(number):
+    response=client.post('/api/predict',content='{"recency":'+number+',"frequency":1,"monetary":100}',headers={'Content-Type':'application/json'})
+    assert response.status_code==422
+    assert response.json()['detail'][0]['loc']==['body','recency']
+
 @pytest.mark.parametrize('limit',[-1,0,10001,'bad'])
 def test_invalid_visualization_limits(limit):
     assert client.get(f'/api/visualization?sample_limit={limit}').status_code==422
@@ -90,3 +96,37 @@ def test_paths_independent_of_working_directory(monkeypatch,tmp_path):
     monkeypatch.chdir(tmp_path)
     assert client.get('/api/overview').status_code==200
     assert client.post('/api/predict',json={'recency':12,'frequency':6,'monetary':1800}).status_code==200
+
+def test_health_and_prediction_fail_when_pipeline_missing(monkeypatch):
+    from backend.services.prediction_service import prediction_service
+    monkeypatch.setattr(prediction_service,'_pipeline',None)
+    monkeypatch.setattr(prediction_service,'_load_artifacts',lambda:None)
+    assert client.get('/api/health').status_code==503
+    assert client.post('/api/predict',json={'recency':12,'frequency':6,'monetary':1800}).status_code==503
+
+def test_cors_is_restricted_to_configured_origins():
+    allowed=client.options('/api/predict',headers={'Origin':'http://localhost:5173','Access-Control-Request-Method':'POST'})
+    assert allowed.headers['access-control-allow-origin']=='http://localhost:5173'
+    denied=client.options('/api/predict',headers={'Origin':'https://unconfigured.example','Access-Control-Request-Method':'POST'})
+    assert denied.status_code==400
+    assert 'access-control-allow-origin' not in denied.headers
+
+def test_report_sections_results_and_page_geometry():
+    import fitz
+    metrics=json.loads((ROOT/'ml/artifacts/evaluation_metrics.json').read_text())
+    audit=json.loads((ROOT/'data/processed/preprocessing_audit.json').read_text())
+    with fitz.open(ROOT/'reports/ShopSense_AI_Case_Study.pdf') as pdf:
+        assert len(pdf)==7
+        text='\n'.join(page.get_text() for page in pdf)
+        for section in ['1. Introduction','2. Literature','3. Problem Statement / Objectives','4. Methodology / Implementation','5. Results']:
+            assert text.count(section)==1
+        for value in [f'{audit["unique_customers"]:,}',f'{audit["total_orders"]:,}',f'{audit["total_revenue_gbp"]:,.2f}',str(metrics['silhouette_score']),str(metrics['davies_bouldin_index']),str(metrics['calinski_harabasz_score'])]:
+            assert value in text
+        assert '$$' not in text
+        assert sum(len(p.get_images()) for p in pdf)>=4
+        for page in pdf:
+            assert abs(page.rect.width-595.28)<1
+            assert abs(page.rect.height-841.89)<1
+            for x0,y0,x1,y1,*_ in page.get_text('blocks'):
+                assert 0<=x0<x1<=page.rect.width
+                assert 0<=y0<y1<=page.rect.height

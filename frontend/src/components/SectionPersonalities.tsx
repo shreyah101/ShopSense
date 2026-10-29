@@ -114,7 +114,7 @@ export const SectionPersonalities: React.FC<Props> = ({
                     <span className="flex items-center gap-1.5 text-[#242725]/60">
                       <PoundSterling className="w-3.5 h-3.5 text-[#4f6955]" /> Median Spend:
                     </span>
-                    <span className="font-bold text-[#242725]">£{seg.Monetary_median.toLocaleString()}</span>
+                    <span className="font-bold text-[#242725]">£{seg.Monetary_median.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 

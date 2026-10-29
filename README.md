@@ -48,7 +48,7 @@ Names are derived from median RFM relative to population medians; cluster IDs ha
 
 ## Setup and reproduction (PowerShell)
 
-Tested with Python 3.13, Node 24 and scikit-learn 1.8.0. Use Node 22.12+ or a compatible newer LTS release. The Python lock file records tested direct dependency versions. Only load trusted joblib artifacts.
+Tested with Python 3.13, Node 22.22.2 and scikit-learn 1.8.0. Use Node 22.12+ or a compatible newer LTS release. The Python lock file records tested direct dependency versions. Only load trusted joblib artifacts.
 
 From the project directory:
 

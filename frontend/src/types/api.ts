@@ -146,6 +146,6 @@ export interface PredictResponse {
     monetary_comparison: string;
   };
   is_outlier: boolean;
-  outlier_warning?: string;
+  outlier_warning?: string | null;
 }
 

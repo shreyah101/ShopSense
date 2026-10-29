@@ -17,7 +17,7 @@ with sync_playwright() as p:
     page.get_by_role('heading',name='Every purchase tells a story.').wait_for()
     assert page.locator('.recharts-scatter-symbol').count()==4338
     card=page.get_by_role('button',name='Inspect High-Value Champions')
-    card.click();assert card.get_attribute('aria-pressed')=='true'
+    card.focus();card.press('Enter');assert card.get_attribute('aria-pressed')=='true'
     assert page.get_by_text('Inspecting Tier 1: High Value').is_visible()
     page.get_by_role('button',name='Experiments',exact=True).click()
     assert page.get_by_role('cell',name='0.3373',exact=True).is_visible()

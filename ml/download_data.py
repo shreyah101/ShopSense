@@ -13,7 +13,6 @@ from pathlib import Path
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "raw"
 DATA_FILE = DATA_DIR / "Online Retail.xlsx"
 UCI_ZIP_URL = "https://archive.ics.uci.edu/static/public/352/online+retail.zip"
-ALT_XLSX_URL = "https://raw.githubusercontent.com/datasets/online-retail/master/data/online_retail.xlsx"
 
 def check_or_download_dataset() -> bool:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -35,7 +34,11 @@ def check_or_download_dataset() -> bool:
         print(f"Downloaded ZIP ({zip_path.stat().st_size / (1024*1024):.2f} MB). Extracting...")
 
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(DATA_DIR)
+            # Read only the expected workbook; archive members cannot escape DATA_DIR.
+            member = next((name for name in zip_ref.namelist() if Path(name).name.lower() == 'online retail.xlsx'), None)
+            if member is None:
+                raise FileNotFoundError('Official archive did not contain the expected workbook')
+            DATA_FILE.write_bytes(zip_ref.read(member))
         
         if zip_path.exists():
             zip_path.unlink()

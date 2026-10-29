@@ -12,7 +12,7 @@
     "name": "High-Value Champions",
     "badge": "Tier 1: High Value",
     "color": "#2E5A44",
-    "description": "Customers who shop frequently, purchased recently, and generate substantially higher revenue than average.",
+    "description": "Customers who shop frequently, purchased recently, and generate higher recorded spending than the population median.",
     "characteristics": [
       "Median spending of \u00a33,722.82 (5.6x population median)",
       "High purchase frequency of 10 orders (population median: 2)",
@@ -66,7 +66,7 @@
     "characteristics": [
       "Purchased recently (17 days ago)",
       "Steady order cadence of 2 orders",
-      "Moderate lifetime spend (\u00a3466.70)"
+      "Moderate recorded spend (\u00a3466.70)"
     ],
     "business_insight": "Cross-selling related basket items or offering volume discounts may encourage higher average order values.",
     "r_diff": "Recent",
@@ -91,7 +91,7 @@
     "characteristics": [
       "Protracted inactivity (177 days since last order)",
       "Single or very few purchases (1 orders)",
-      "Low lifetime expenditure (\u00a3298.40)"
+      "Low recorded expenditure (\u00a3298.40)"
     ],
     "business_insight": "Evaluate cost-effective automated re-engagement or reserve marketing budget for higher-converting segments.",
     "r_diff": "Dormant",

@@ -40,7 +40,7 @@ interface Props {
           </div>
           <div className="text-gray-300 flex justify-between">
             <span>Monetary:</span>
-            <strong className="text-white">£{Number(pt.monetary).toLocaleString()}</strong>
+            <strong className="text-white">£{Number(pt.monetary).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
           </div>
           <div className="text-[10px] text-gray-400 pt-1 border-t border-[#3A3E3B]">
             PCA: ({pt.pca1.toFixed(2)}, {pt.pca2.toFixed(2)})

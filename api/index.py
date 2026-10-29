@@ -9,3 +9,4 @@ if str(ROOT_DIR) not in sys.path:
 from backend.main import app
 
 # Export app for Vercel Serverless Function
+

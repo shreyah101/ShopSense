@@ -23,7 +23,7 @@ def display_evaluation():
         for s in audit["steps"]:
             print(f"   - Step {s['step']} ({s['name']}): Excluded {s['excluded']:,} -> {s['remaining']:,} rows")
         print(f"   Final Valid Transactions:     {audit['total_clean_rows']:,} ({audit['retention_rate_pct']}% retention)")
-        print(f"   Total Gross Revenue:          £{audit['total_revenue_gbp']:,.2f}")
+        print(f"   Positive Recorded Spending:          £{audit['total_revenue_gbp']:,.2f}")
         print(f"   Unique Valid Customers:       {audit['unique_customers']:,}")
 
     metrics_file = ARTIFACTS_DIR / "evaluation_metrics.json"

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Navbar } from './components/Navbar';
 import { SectionOverview } from './components/SectionOverview';
 import { SectionPersonalities } from './components/SectionPersonalities';
-import { SectionClusterMap } from './components/SectionClusterMap';
-import { SectionBehindAI } from './components/SectionBehindAI';
+const SectionClusterMap = lazy(() => import('./components/SectionClusterMap').then(m => ({ default: m.SectionClusterMap })));
+const SectionBehindAI = lazy(() => import('./components/SectionBehindAI').then(m => ({ default: m.SectionBehindAI })));
 import { SectionPredictor } from './components/SectionPredictor';
 import { SectionMethodology } from './components/SectionMethodology';
 import { Footer } from './components/Footer';
@@ -61,12 +61,6 @@ export function App() {
       <a href="#main" className="skip-link">Skip to content</a>
       <Navbar />
 
-      {error && (
-        <div className="bg-[#FAF5F2] border-b border-[#F0D5CB] py-2 px-6 text-center text-xs text-[#C77D5C]">
-          <span>Note: Connecting to local backend at <code>localhost:8000</code>. ({error})</span>
-        </div>
-      )}
-
       <main id="main" className="flex-1">
         {loading ? <div role="status" className="p-12 text-center">Loading verified dataset and model results…</div> : error ? <div role="alert" className="p-12 text-center"><h1 className="font-editorial text-3xl mb-3">Analytics unavailable</h1><p className="mb-5">{error}</p><button className="px-4 py-2 border" onClick={() => window.location.reload()}>Retry connection</button></div> : <>
         <SectionOverview overview={overview} loading={loading} />
@@ -75,6 +69,7 @@ export function App() {
           selectedClusterId={selectedClusterId}
           onSelectCluster={setSelectedClusterId}
         />
+        <Suspense fallback={<p role="status" className="p-6">Loading customer explorer…</p>}>
         <SectionClusterMap
           data={visualization}
           segments={segments}
@@ -82,7 +77,10 @@ export function App() {
           selectedClusterId={selectedClusterId}
           onSelectCluster={setSelectedClusterId}
         />
+        </Suspense>
+        <Suspense fallback={<p role="status" className="p-6">Loading evaluation charts…</p>}>
         <SectionBehindAI evaluation={evaluation} segments={segments} />
+        </Suspense>
         <SectionPredictor />
         <SectionMethodology overview={overview} />
         </>}

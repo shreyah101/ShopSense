@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
           <div className="text-xs text-[#242725]/60">
-            Coursework: Artificial Intelligence &bull; Supervised & Unsupervised Learning Module
+            Coursework: Artificial Intelligence &bull; Unsupervised customer segmentation
           </div>
         </div>
       </div>

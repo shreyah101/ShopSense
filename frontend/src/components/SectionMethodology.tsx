@@ -24,6 +24,9 @@ export const SectionMethodology: React.FC<Props> = ({ overview }) => {
           </p>
         </div>
 
+        <ol aria-label="Methodology workflow" className="flex flex-wrap gap-2 mb-8">
+          {['Dataset', 'Cleaning', 'RFM', 'Log1p + scaling', 'K-Means', 'Evaluation', 'Segments'].map((step, i) => <li key={step} className="text-xs border border-[#deddd5] bg-white px-3 py-2"><span className="text-[#4f6955] mr-2">{i + 1}</span>{step}</li>)}
+        </ol>
         {/* Cleaning Audit Table */}
         <div className="rounded-md bg-white border border-[#EAE9E4] overflow-hidden  mb-10">
           <div className="p-5 bg-[#FAF9F5] border-b border-[#EAE9E4] flex flex-wrap items-center justify-between gap-4">
@@ -133,7 +136,7 @@ export const SectionMethodology: React.FC<Props> = ({ overview }) => {
               <ShieldCheck className="w-4 h-4" /> Academic Integrity
             </div>
             <h4 className="font-editorial text-base font-bold text-[#242725] mb-2">
-              Zero Synthetic Fabrication
+              Traceable results
             </h4>
             <p className="text-xs text-[#242725]/70 leading-relaxed">
               Every customer profile, centroid, silhouette metric, and chart point originates directly from the

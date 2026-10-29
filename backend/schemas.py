@@ -65,6 +65,19 @@ class TrainingRange(BaseModel):
     min: float
     max: float
 
+class HealthResponse(BaseModel):
+    status: str
+    service: str
+    dataset: str
+
+class ClusterSummary(BaseModel):
+    cluster_id: int
+    name: str
+    badge: str
+    color: str
+    count: int
+    percentage: float
+
 class EvaluationResponse(BaseModel):
     random_seed: int
     n_init: int
@@ -102,12 +115,12 @@ class VisualizationResponse(BaseModel):
     total_points: int
     pca_variance_pct: float
     points: List[ScatterPoint]
-    clusters: List[Dict[str, Any]]
+    clusters: List[ClusterSummary]
 
 class PredictRequest(BaseModel):
     model_config = {"allow_inf_nan": False, "extra": "forbid", "strict": True}
     recency: float = Field(..., ge=0, description="Days since last transaction (>= 0)")
-    frequency: int = Field(..., ge=1, description="Total number of completed orders (>= 1)")
+    frequency: int = Field(..., ge=1, le=9007199254740991, description="Completed orders, represented as a safe integer")
     monetary: float = Field(..., ge=0.01, description="Total monetary spend in GBP (> 0)")
 
 class PredictResponse(BaseModel):

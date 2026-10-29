@@ -6,6 +6,7 @@ Academic Case Study API for Discovering Shopping Personalities
 import os
 from fastapi import FastAPI, HTTPException, status, Query, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 
@@ -17,6 +18,7 @@ from backend.schemas import (
     PredictRequest,
     PredictResponse
 )
+from backend.schemas import HealthResponse
 from backend.services.data_service import data_service
 from backend.services.clustering_service import clustering_service
 from backend.services.prediction_service import prediction_service
@@ -41,7 +43,13 @@ app.add_middleware(
 async def missing_artifact(request: Request, exc: FileNotFoundError):
     return JSONResponse(status_code=503, content={"detail": "Required artifacts unavailable. Run preprocessing and training first."})
 
-@app.get("/api/health", summary="Service Health Check")
+@app.exception_handler(RequestValidationError)
+async def invalid_request(request: Request, exc: RequestValidationError):
+    # Avoid echoing non-finite inputs, which cannot be encoded as valid JSON.
+    errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": errors})
+
+@app.get("/api/health", response_model=HealthResponse, summary="Service Health Check")
 def health_check():
     data_service.get_overview()
     clustering_service.get_evaluation()
