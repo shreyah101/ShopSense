@@ -80,7 +80,7 @@ export const SectionOverview: React.FC<Props> = ({ overview, loading }) => {
               {loading || !overview ? '—' : overview.discovered_segments_count}
             </div>
             <p className="text-xs text-[#242725]/60">
-              Selected via Silhouette, Inertia, and operational balance
+              Interpretable granularity after evaluating K=2–8
             </p>
           </div>
         </div>

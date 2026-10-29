@@ -46,7 +46,7 @@ def generate_personality_profile(cluster_id, stats, pop_medians):
         name = "High-Value Champions"
         badge = "Tier 1: High Value"
         color = "#2E5A44"  # deep sage forest
-        description = "Customers who shop frequently, purchased recently, and generate substantially higher revenue than average."
+        description = "Customers who shop frequently, purchased recently, and generate higher recorded spending than the population median."
         characteristics = [
             f"Median spending of £{m_med:,.2f} ({(m_med/m_pop):.1f}x population median)",
             f"High purchase frequency of {f_med:.0f} orders (population median: {f_pop:.0f})",
@@ -62,7 +62,7 @@ def generate_personality_profile(cluster_id, stats, pop_medians):
         characteristics = [
             f"Purchased recently ({r_med:.0f} days ago)",
             f"Steady order cadence of {f_med:.0f} orders",
-            f"Moderate lifetime spend (£{m_med:,.2f})"
+            f"Moderate recorded spend (£{m_med:,.2f})"
         ]
         business_insight = "Cross-selling related basket items or offering volume discounts may encourage higher average order values."
 
@@ -98,7 +98,7 @@ def generate_personality_profile(cluster_id, stats, pop_medians):
         characteristics = [
             f"Protracted inactivity ({r_med:.0f} days since last order)",
             f"Single or very few purchases ({f_med:.0f} orders)",
-            f"Low lifetime expenditure (£{m_med:,.2f})"
+            f"Low recorded expenditure (£{m_med:,.2f})"
         ]
         business_insight = "Evaluate cost-effective automated re-engagement or reserve marketing budget for higher-converting segments."
 

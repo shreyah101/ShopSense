@@ -20,24 +20,6 @@ interface Props {
   onSelectCluster: (clusterId: number | null) => void;
 }
 
-export const SectionClusterMap: React.FC<Props> = ({
-  data,
-  segments,
-  loading,
-  selectedClusterId,
-  onSelectCluster,
-}) => {
-  // Group points by cluster
-  const pointsByCluster = useMemo(() => {
-    if (!data?.points) return {};
-    const map: Record<number, ScatterPoint[]> = {};
-    for (const p of data.points) {
-      if (!map[p.cluster_id]) map[p.cluster_id] = [];
-      map[p.cluster_id].push(p);
-    }
-    return map;
-  }, [data]);
-
   // Custom Tooltip
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: readonly { payload: ScatterPoint }[] }) => {
     if (active && payload && payload.length) {
@@ -68,6 +50,25 @@ export const SectionClusterMap: React.FC<Props> = ({
     }
     return null;
   };
+
+export const SectionClusterMap: React.FC<Props> = ({
+  data,
+  segments,
+  loading,
+  selectedClusterId,
+  onSelectCluster,
+}) => {
+  // Group points by cluster
+  const pointsByCluster = useMemo(() => {
+    if (!data?.points) return {};
+    const map: Record<number, ScatterPoint[]> = {};
+    for (const p of data.points) {
+      if (!map[p.cluster_id]) map[p.cluster_id] = [];
+      map[p.cluster_id].push(p);
+    }
+    return map;
+  }, [data]);
+
 
   return (
     <section id="cluster-map" className="py-12 border-b border-[#EAE9E4]">

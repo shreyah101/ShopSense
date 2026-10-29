@@ -121,11 +121,12 @@ export const SectionPredictor: React.FC = () => {
                 <div className="relative">
                   <input
                     type="number"
+                    disabled={loading}
                     min="0"
                     step="1"
                     id="recency"
                     value={recency}
-                    onChange={(e) => setRecency(e.target.value)}
+                    onChange={(e) => { setRecency(e.target.value); setResult(null); }}
                     placeholder="e.g. 15"
                     className="w-full px-3.5 py-2.5 rounded-lg border border-[#D5D3C8] text-sm focus:outline-none focus:ring-2 focus:ring-[#718776] focus:border-transparent bg-[#FAF9F5]"
                     required
@@ -144,11 +145,12 @@ export const SectionPredictor: React.FC = () => {
                 <div className="relative">
                   <input
                     type="number"
+                    disabled={loading}
                     min="1"
                     step="1"
                     id="frequency"
                     value={frequency}
-                    onChange={(e) => setFrequency(e.target.value)}
+                    onChange={(e) => { setFrequency(e.target.value); setResult(null); }}
                     placeholder="e.g. 4"
                     className="w-full px-3.5 py-2.5 rounded-lg border border-[#D5D3C8] text-sm focus:outline-none focus:ring-2 focus:ring-[#718776] focus:border-transparent bg-[#FAF9F5]"
                     required
@@ -168,11 +170,12 @@ export const SectionPredictor: React.FC = () => {
                   <span className="absolute left-3.5 top-2.5 text-sm text-[#242725]/65">£</span>
                   <input
                     type="number"
+                    disabled={loading}
                     min="0.01"
                     step="0.01"
                     id="monetary"
                     value={monetary}
-                    onChange={(e) => setMonetary(e.target.value)}
+                    onChange={(e) => { setMonetary(e.target.value); setResult(null); }}
                     placeholder="e.g. 1200"
                     className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#D5D3C8] text-sm focus:outline-none focus:ring-2 focus:ring-[#718776] focus:border-transparent bg-[#FAF9F5]"
                     required

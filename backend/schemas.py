@@ -51,7 +51,27 @@ class CandidateKEval(BaseModel):
     cluster_sizes: List[int]
     min_cluster_pct: float
 
+class ExperimentDetail(BaseModel):
+    name: str
+    description: str
+    results: List[CandidateKEval]
+    finding: str
+
+class ExperimentComparison(BaseModel):
+    experiment_a_raw: ExperimentDetail
+    experiment_b_log: ExperimentDetail
+
+class TrainingRange(BaseModel):
+    min: float
+    max: float
+
 class EvaluationResponse(BaseModel):
+    random_seed: int
+    n_init: int
+    silhouette_sample_size: int
+    sklearn_version: str
+    selection_reason: str
+    training_ranges: Dict[str, TrainingRange]
     selected_k: int
     n_customers: int
     silhouette_score: float
@@ -63,7 +83,7 @@ class EvaluationResponse(BaseModel):
     population_medians: Dict[str, float]
     population_means: Dict[str, float]
     candidate_k_evaluation: List[CandidateKEval]
-    experiment_comparison: Dict[str, Any]
+    experiment_comparison: ExperimentComparison
 
 class ScatterPoint(BaseModel):
     customer_id: int

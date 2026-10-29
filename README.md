@@ -1,210 +1,133 @@
-# ShopSense — Discovering Shopping Personalities Using Machine Learning
+# ShopSense
 
-> **Academic Case Study for B.Tech Artificial Intelligence Coursework**  
-> **Institution:** Department of Artificial Intelligence, School of Computer Science & Engineering, Vellore Institute of Technology  
-> **Core Topic:** Unsupervised Learning &bull; Customer Segmentation &bull; RFM Behavioral Modeling &bull; K-Means Clustering  
+Discovering different shopping personalities using machine learning. An AI academic case study for VIT Vellore, built with Python, pandas, scikit-learn, FastAPI/Pydantic, React, TypeScript, Vite, Tailwind and Recharts. ReportLab generates the academic PDF.
 
----
+ShopSense converts transaction lines into customer RFM profiles, compares raw and log feature spaces, and exposes the results through an interactive analytics page. Personality names describe observed purchase behavior; they are not psychological assessments. This is an educational implementation, not a novel clustering algorithm or a production decision system.
 
-## 1. Project Overview & Research Question
+## Dataset and verified preprocessing
 
-**ShopSense** is a complete, working academic case study demonstrating how unsupervised machine learning can discover natural customer shopping personalities from historical transaction logs without predefined target labels.
+[UCI Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail), Chen, D. (2015), DOI: [10.24432/C5BW33](https://doi.org/10.24432/C5BW33), CC BY 4.0. Transactions cover 1 December 2010 through 9 December 2011. The retailer sells gifts; many customers are wholesalers.
 
-### Core Research Question:
-> *"Can K-Means clustering, combined with RFM analysis, discover meaningful, reproducible customer shopping patterns from historical retail transactions, and can these patterns be translated into interpretable behavioral profiles?"*
+The workbook contains **541,909 lines**. Sequential exclusions:
 
-The system demonstrates:
-1. **Audited Data Cleaning:** Systematic filtering of cancellations, missing IDs, duplicates, and invalid prices with a rigorous step-by-step audit trail.
-2. **RFM Feature Engineering:** Customer-level aggregation of Recency ($R$), Frequency ($F$), and Monetary ($M$) metrics against a fixed dataset horizon.
-3. **Variance Normalization:** Log transformation (`np.log1p`) followed by `StandardScaler` to prevent extreme wholesale spenders from distorting centroids.
-4. **Principled Model Selection:** Systematic evaluation of candidate $K \in [2, 8]$ using Inertia, Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Score, and cluster balance.
-5. **Controlled Comparative Experiment:** Experiment A (Raw RFM) vs. Experiment B (Log-Transformed RFM), proving why raw features yield degenerate 0.3% outlier clusters.
-6. **Plain-English Personality Profiles:** Dynamic generation of descriptive archetypes derived directly from observed cluster medians.
-7. **Full-Stack Academic Application:** Fast, typed FastAPI backend paired with a minimalist, editorial React + TypeScript interface and interactive 2D PCA visualization.
+| Stage | Excluded | Remaining |
+|---|---:|---:|
+| Missing CustomerID removal | 135,080 | 406,829 |
+| Cancelled transactions removal | 8,905 | 397,924 |
+| Non-positive Quantity or UnitPrice removal | 40 | 397,884 |
+| Exact duplicate records removal | 5,192 | 392,692 |
 
----
+Result: **392,692 valid lines**, **4,338 customers**, **18,532 distinct invoices**, and **£8,887,208.89 positive recorded spending**. This spending excludes returns and is not net revenue. Duplicate identity uses every original column, including Country; duplicate origin is unknown.
 
-## 2. Dataset Information
+Recency uses elapsed whole 24-hour days relative to **2011-12-10 12:50:00**, one day after the final retained transaction. Frequency counts distinct invoices per customer, not lines. Monetary sums Quantity × UnitPrice, rounding each line to two decimal places. CustomerID is never a clustering input. The audit JSON records sequential counts and the workbook SHA-256.
 
-- **Dataset Name:** [UCI Online Retail Dataset (ID 352)](https://archive.ics.uci.edu/dataset/352/online+retail)
-- **Original Authors:** Daqing Chen, Sai Liang Sain, and Kun Guo (2012)
-- **Domain:** UK-based online non-store giftware retailer
-- **Timeframe:** December 1, 2010 to December 9, 2011
-- **Raw Dimensions:** 541,909 rows, 8 columns (`InvoiceNo`, `StockCode`, `Description`, `Quantity`, `InvoiceDate`, `UnitPrice`, `CustomerID`, `Country`)
+## ML methodology and actual results
 
-### Cleaning Audit Summary:
-| Cleaning Stage | Rows Excluded | Rows Remaining | Retention % | Academic Justification |
-| :--- | :---: | :---: | :---: | :--- |
-| **Raw Dataset** | - | 541,909 | 100.0% | Original UCI transaction log |
-| **Step 1: Missing Customer ID** | 135,080 | 406,829 | 75.08% | Transactions cannot be attributed to a customer profile |
-| **Step 2: Cancelled Invoices** | 8,905 | 397,924 | 73.43% | Invoices starting with 'C' indicate cancellations/refunds |
-| **Step 3: Invalid Quantity/Price** | 40 | 397,884 | 73.42% | Zero or negative unit price and damaged goods entries |
-| **Step 4: Exact Duplicates** | 5,192 | 392,692 | **72.46%** | Redundant duplicate system submissions |
+For every K=2..8, compare A: StandardScaler(raw RFM) against B: StandardScaler(log1p(RFM)). All candidates and the final model use K-Means++, Lloyd updates, seed 42 and n_init=20. All 4,338 customers are used for silhouette scoring without sampling. Training runs with one numerical thread.
 
-- **Final Unique Customers:** **4,338**
-- **Total Valid Purchase Revenue:** **£8,887,208.89**
-- **Total Completed Orders:** **19,788**
+**Selected: log RFM, K=4**. K=4 is a descriptive granularity choice after inspecting K=2..8. K=2 has the highest log-space silhouette; four clusters retain useful RFM detail with balanced groups. The elbow is gradual, and no uniquely optimal K is claimed. Log scaling creates more balanced descriptive groups. Raw scaling is not mathematically invalid; it emphasizes extreme buyers. Metrics from different geometries cannot establish an accuracy improvement. Scores are internal fit-set diagnostics, with no external ground-truth labels or temporal holdout.
 
----
+| Final-model diagnostic | Value |
+|---|---:|
+| Silhouette | 0.3373 |
+| Davies–Bouldin (lower preferred) | 1.0106 |
+| Calinski–Harabasz (higher preferred) | 3328.92 |
+| Inertia | 3938.6 |
+| Two-component PCA variance | 93.87% |
 
-## 3. Discovered Shopping Personalities ($K=4$)
+PCA is for display only; clustering uses all three standardized log features. All customers appear on the default interactive map; optional sampling is explicit and deterministic (seed 42).
 
-| Personality Name | Population Share | Median Recency | Median Frequency | Median Spend | Distinguishing Behavioral Trait |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **High-Value Champions** | 709 (16.3%) | 8 days | 10 orders | £3,722.82 | Recent buyers with 5.6x median spending and steady cadence |
-| **At-Risk Valuable Shoppers** | 1,173 (27.0%) | 55 days | 4 orders | £1,341.65 | Substantial historical revenue, but inactive for nearly 2 months |
-| **Active Regular Shoppers** | 839 (19.3%) | 17 days | 2 orders | £466.70 | Frequent recent orders with modest basket values |
-| **Dormant Low-Engagement** | 1,617 (37.3%) | 177 days | 1 order | £298.40 | Inactive for ~6 months, single low-value purchase |
+| Descriptive segment | Customers | Median recency (days) | Median frequency | Median spending |
+|---|---:|---:|---:|---:|
+| High-Value Champions | 709 (16.34%) | 8 | 10 | £3,722.82 |
+| At-Risk Valuable Shoppers | 1,173 (27.04%) | 55 | 4 | £1,341.65 |
+| Active Regular Shoppers | 839 (19.34%) | 17 | 2 | £466.70 |
+| Dormant Low-Engagement Shoppers | 1,617 (37.28%) | 177 | 1 | £298.40 |
 
-*Population Medians for Baseline Comparison: Recency = 51.0 days, Frequency = 2.0 orders, Monetary = £668.57.*
+Names are derived from median RFM relative to population medians; cluster IDs have no ordinal meaning. Any retention or marketing suggestions are hypotheses, not measured outcomes.
 
----
+## Setup and reproduction (PowerShell)
 
-## 4. Key Experimental Results: Raw vs. Log-Transformed Features
+Tested with Python 3.13, Node 24 and scikit-learn 1.8.0. Use Node 22.12+ or a compatible newer LTS release. The Python lock file records tested direct dependency versions. Only load trusted joblib artifacts.
 
-```
-[Experiment A: Raw RFM + StandardScaler]
-K=2: Silhouette 0.8958 | Min Cluster %: 0.6% (26 customers)
-K=3: Silhouette 0.5942 | Min Cluster %: 0.6%
-K=4: Silhouette 0.6162 | Min Cluster %: 0.3% (13 customers)
-Finding: Deceptively high silhouette scores caused by extreme wholesale spenders
-occupying isolated outlier clusters, leaving 90%+ in one undifferentiated group.
+From the project directory:
 
-[Experiment B: Log-Transformed RFM (np.log1p) + StandardScaler] (SELECTED)
-K=2: Silhouette 0.4328 | Min Cluster %: 38.4%
-K=3: Silhouette 0.3365 | Min Cluster %: 17.7%
-K=4: Silhouette 0.3375 | Min Cluster %: 16.4% (Selected Model)
-Finding: Normalizes heavy right-skewed variance, generating four balanced,
-interpretable, and operationally distinct retail customer segments.
-```
-
-- **PCA 2D Projection Explained Variance:** **93.87%** (PC1: 75.08%, PC2: 18.79%).
-
----
-
-## 5. Technology Stack
-
-- **Machine Learning & Analytics:** Python 3.11+, Scikit-learn, Pandas, NumPy, Joblib, SciPy, Matplotlib
-- **Backend API:** FastAPI, Uvicorn, Pydantic v2
-- **Frontend Application:** React 19, TypeScript, Vite, Tailwind CSS v4, Recharts, Lucide Icons
-- **Academic PDF Engine:** ReportLab (producing a formal 7-page university report)
-- **Testing:** Pytest, HTTPX
-
----
-
-## 6. Project Directory Structure
-
-```text
-ShopSense/
-├── backend/
-│   ├── main.py                     # FastAPI entrypoint with 6 REST endpoints
-│   ├── schemas.py                  # Pydantic v2 request/response schemas
-│   ├── services/
-│   │   ├── data_service.py         # Preprocessing audit data provider
-│   │   ├── clustering_service.py   # Cluster profiles & PCA coordinate provider
-│   │   └── prediction_service.py   # Real-time inference & outlier detector
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/             # Overview, Personalities, ClusterMap, BehindAI, Predictor, Methodology
-│   │   ├── services/api.ts         # Type-safe API client
-│   │   ├── types/api.ts            # TypeScript interfaces
-│   │   ├── App.tsx                 # Root application component
-│   │   └── index.css               # Editorial theme with Tailwind v4
-│   ├── package.json
-│   └── vite.config.ts
-├── ml/
-│   ├── download_data.py            # Reproducible UCI dataset downloader
-│   ├── preprocess.py               # 4-stage data cleaning & RFM aggregator
-│   ├── train.py                    # Candidate K evaluation, PCA, & artifact generator
-│   ├── evaluate.py                 # Academic evaluation CLI
-│   └── artifacts/                  # Fitted models, scalers, profiles, and PCA CSV
-├── data/
-│   ├── raw/Online Retail.xlsx      # Official 23.7 MB UCI dataset
-│   └── processed/                  # Cleaned parquet, rfm_raw.csv, audit JSON
-├── reports/
-│   ├── figures/                    # 6 high-res academic figures (300 DPI)
-│   ├── generate_report.py          # ReportLab 7-page PDF generator
-│   ├── ShopSense_AI_Case_Study.pdf # Mandatory university deliverable
-│   └── VIVA_NOTES.md               # 12 viva questions & faculty Q&A guide
-├── tests/
-│   ├── test_rfm_and_model.py       # RFM logic & model artifact tests
-│   └── test_api.py                 # FastAPI endpoint validation tests
-├── README.md
-└── .gitignore
-```
-
----
-
-## 7. Setup & Execution Guide
-
-### Prerequisites
-- Python 3.11+ installed and accessible via `python`
-- Node.js 18+ and npm installed and accessible via `npm`
-
-### Step 1: Install Python Dependencies
-```bash
-pip install -r backend/requirements.txt
-```
-
-### Step 2: Verify / Download Dataset
-```bash
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-lock.txt
 python ml/download_data.py
-```
-*(If offline, ensure `Online Retail.xlsx` is placed in `data/raw/`)*
-
-### Step 3: Run Data Preprocessing
-```bash
 python ml/preprocess.py
-```
-*Outputs: `data/processed/rfm_raw.csv` and `data/processed/preprocessing_audit.json`*
-
-### Step 4: Train Machine Learning Pipeline
-```bash
 python ml/train.py
-```
-*Outputs: Fitted joblib models in `ml/artifacts/` and 6 high-res plots in `reports/figures/`*
-
-### Step 5: Run Academic Evaluation Summary
-```bash
 python ml/evaluate.py
+python reports/generate_report.py
+python -m pytest -q
+cd frontend
+npm ci
+npm run build
+npm run lint
 ```
 
-### Step 6: Generate the Academic Case Study PDF
-```bash
+The downloader uses the official UCI archive when the workbook is absent. Preprocessing and training overwrite derived artifacts. Regenerate after changing data or library versions; restart the API after regeneration because it caches artifacts.
+
+Start the backend in one terminal from the project directory:
+
+```powershell
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+Start the frontend in a second terminal:
+
+```powershell
+cd frontend
+npm run dev -- --host 127.0.0.1
+```
+
+Open [ShopSense](http://127.0.0.1:5173/) or [API documentation](http://127.0.0.1:8000/docs). Vite proxies `/api` to `127.0.0.1:8000` during development and preview. For a separate frontend host set `VITE_API_BASE` in `frontend/.env.local` and configure `CORS_ORIGINS` in the backend process environment. `.env.example` is documentation; Python does not automatically load it.
+
+## API contracts
+
+| Method | Path | Behavior |
+|---|---|---|
+| GET | /api/health | Checks dataset, model and visualization readiness; missing artifacts return 503 |
+| GET | /api/overview | Counts, spending, date horizon, sequential cleaning audit |
+| GET | /api/segments | Profiles, sizes, proportions and mean/median RFM |
+| GET | /api/segments/{cluster_id} | One profile, or 404 |
+| GET | /api/evaluation | Metrics, K candidates, raw/log experiment and training settings |
+| GET | /api/visualization | Customer PCA coordinates; sample_limit 1..10000, default 5000 |
+| POST | /api/predict | {recency, frequency, monetary} through saved fitted pipeline |
+
+Prediction requires finite numeric recency >=0, integer frequency >=1 and monetary >=0.01. Missing, negative, non-finite, malformed and extra inputs return 422. Valid inputs outside observed training bounds still receive a prediction with a warning; these are extrapolations. There are no confidence probabilities. API requests never retrain the model. Unexpected artifact-processing failures return 500 without leaking local paths.
+
+## Academic report and viva
+
+Final PDF: `reports/ShopSense_AI_Case_Study.pdf`, seven A4 pages with exactly five main sections: Introduction; Literature; Problem Statement / Objectives; Methodology / Implementation; Results. The Results section includes limitations and future work. Three verified academic sources plus dataset attribution appear in Literature. Source verification links are in `reports/SOURCES.md`.
+
+Edit `reports/student.json` to replace the four clearly marked student metadata placeholders. Then run:
+
+```powershell
 python reports/generate_report.py
 ```
-*Compiles the formal 7-page PDF to `reports/ShopSense_AI_Case_Study.pdf`*
 
-### Step 7: Run Automated Test Suite
-```bash
-python -m pytest
+See `reports/VIVA_NOTES.md` for natural-language explanations and ten faculty questions. To refresh documentation tables after retraining:
+
+```powershell
+python reports/update_documentation.py
 ```
-*Runs all 13 unit and integration tests across data processing, models, and endpoints.*
 
----
+## Verification
 
-## 8. Starting the Web Application
+`python -m pytest -q` checks API validation, audited counts, invoice-level frequency, all customer RFM values, saved-pipeline assignments, metric recomputation, deterministic refitting, training boundaries, missing artifacts and paths independent of the working directory. Temporary files stay under `tmp/`.
 
-### Terminal 1: Backend Server (FastAPI)
-```bash
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+For optional browser testing, install Playwright in the chosen environment and use an installed Microsoft Edge browser. With both servers running:
+
+```powershell
+python -m pip install playwright
+python tests/browser_check.py
 ```
-- API Base URL: `http://localhost:8000`
-- Interactive Swagger Docs: `http://localhost:8000/docs`
-- Health Check: `http://localhost:8000/api/health`
 
-### Terminal 2: Frontend Server (React + Vite)
-```bash
-cd frontend
-npm run dev
-```
-- Frontend UI URL: `http://localhost:5173`
+This verifies all 4,338 plotted customers, keyboard-accessible segment selection, evaluation tabs, saved-model prediction, presets, extrapolation warnings, responsive overflow at 390/768px, and API-unavailable behavior. Screenshots and console results go to `tmp/browser/`. PDF pages can be rendered with PyMuPDF for visual inspection. See `reports/AUDIT.md` for the final engineering audit.
 
----
+## Limitations
 
-## 9. Viva Voce Preparation
-
-For a concise summary of the research methodology, trade-offs, and 5 likely faculty questions with answers, see:
-[`reports/VIVA_NOTES.md`](reports/VIVA_NOTES.md).
-
+One retailer and an old observation window limit generalization. Missing customer identifiers cause exclusions. Dropping cancellations means the monetary feature is gross positive purchase spending rather than net sales. Exact duplicate removal is an assumption. RFM omits product preferences and within-window temporal changes. K-Means assumes Euclidean, roughly spherical groups. K=4 is a reasoned descriptive choice, not a proven unique optimum. No external label validation, seed-stability study, future-churn evaluation or intervention trial has been performed.

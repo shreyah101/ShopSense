@@ -16,7 +16,7 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#242725]/80">
+        <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-[#242725]/80">
           <a href="#overview" className="hover:text-[#242725] transition-colors">Overview</a>
           <a href="#personalities" className="hover:text-[#242725] transition-colors">Personalities</a>
           <a href="#cluster-map" className="hover:text-[#242725] transition-colors">Cluster Map</a>
