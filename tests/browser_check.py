@@ -2,18 +2,20 @@
 Start the API on :8000 and Vite on :5173 before running this script.
 """
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tmp/browser'; OUT.mkdir(parents=True,exist_ok=True)
+BASE_URL=os.environ.get('SHOPSENSE_URL','http://127.0.0.1:5173/')
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True, channel='msedge')
     page=browser.new_page(viewport={'width':1440,'height':1000},device_scale_factor=1)
     errors=[];warnings=[]
     page.on('pageerror',lambda err: errors.append(str(err)))
     page.on('console',lambda msg: warnings.append(msg.text) if msg.type in ['warning','error'] else None)
-    page.goto('http://127.0.0.1:5173/',wait_until='networkidle')
+    page.goto(BASE_URL,wait_until='networkidle')
     page.get_by_role('heading',name='Every purchase tells a story.').wait_for()
     assert page.locator('.recharts-scatter-symbol').count()==4338
     card=page.get_by_role('button',name='Inspect High-Value Champions')
@@ -45,7 +47,7 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT/f'responsive-{width}.png'),full_page=True)
     offline=browser.new_page(viewport={'width':390,'height':844})
     offline.route('**/api/**',lambda route:route.abort())
-    offline.goto('http://127.0.0.1:5173/')
+    offline.goto(BASE_URL)
     offline.get_by_role('heading',name='Analytics unavailable').wait_for()
     assert offline.get_by_role('button',name='Retry connection').is_visible()
     assert offline.locator('.recharts-wrapper').count()==0
