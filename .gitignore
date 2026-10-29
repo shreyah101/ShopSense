@@ -43,3 +43,5 @@ Thumbs.db
 # data/raw/*.xlsx
 # data/raw/*.zip
 
+
+.vercel
